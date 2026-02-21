@@ -23,8 +23,8 @@ data/raw/*
 !data/raw/.gitkeep
 data/processed/*
 !data/processed/.gitkeep
-data/vector_store/*
-!data/vector_store/.gitkeep
+data/chroma_db/*
+!data/chroma_db/.gitkeep
 reports/*
 !reports/.gitkeep
 
