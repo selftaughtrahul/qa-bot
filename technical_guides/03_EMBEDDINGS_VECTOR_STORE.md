@@ -1,7 +1,7 @@
 # Technical Guide 03: Embeddings & Vector Store
 
 ## 📋 Overview
-This guide covers generating dense vector embeddings from document chunks and storing/indexing them in a FAISS vector store for fast semantic retrieval.
+This guide covers generating dense vector embeddings from document chunks and storing/indexing them in a ChromaDB vector store for fast semantic retrieval.
 
 ---
 
@@ -12,7 +12,7 @@ Traditional keyword search (BM25, TF-IDF) matches exact words. Embeddings captur
 ```
 Text Chunk → Embedding Model → Dense Vector [0.12, -0.45, 0.78, ...]
                                                     ↓
-                                          Stored in FAISS Index
+                                          Stored in ChromaDB
 ```
 
 ---
@@ -57,64 +57,83 @@ class DocumentEmbedder:
 
 ---
 
-## Step 2: FAISS Vector Store (`src/retrieval/vector_store.py`)
+## Step 2: ChromaDB Vector Store (`src/retrieval/vector_store.py`)
 
 ```python
-import faiss
+import chromadb
+import uuid
 import numpy as np
-import json
 import os
-from typing import List, Dict, Tuple
-from embedder import DocumentEmbedder
+from typing import List, Dict
+from src.retrieval.embedder import DocumentEmbedder
 
+class ChromaVectorStore:
+    """ChromaDB-based vector store for document chunk retrieval."""
 
-class FAISSVectorStore:
-    """FAISS-based vector store for document chunk retrieval."""
-
-    def __init__(self, embedding_dim: int = 384):
-        self.embedding_dim = embedding_dim
-        # Inner Product index (works with normalized vectors = cosine similarity)
-        self.index = faiss.IndexFlatIP(embedding_dim)
-        self.chunks: List[Dict] = []  # Stores metadata alongside vectors
+    def __init__(self, persist_directory: str = "data/chroma_db", collection_name: str = "qa_docs"):
+        os.makedirs(persist_directory, exist_ok=True)
+        self.client = chromadb.PersistentClient(path=persist_directory)
+        self.collection = self.client.get_or_create_collection(
+            name=collection_name,
+            metadata={"hnsw:space": "cosine"}
+        )
 
     def add_chunks(self, chunks: List[Dict], embedder: DocumentEmbedder):
-        """Embed chunks and add them to the FAISS index."""
+        """Embed chunks and add them to the ChromaDB index."""
+        if not chunks:
+            return
+
         texts = [chunk["content"] for chunk in chunks]
         print(f"🔢 Generating embeddings for {len(texts)} chunks...")
         embeddings = embedder.embed_texts(texts)
 
-        # Add to FAISS index
-        self.index.add(embeddings.astype(np.float32))
-        self.chunks.extend(chunks)
-        print(f"✅ Added {len(chunks)} chunks to vector store. Total: {self.index.ntotal}")
+        ids = [str(uuid.uuid4()) for _ in chunks]
+        metadatas = []
+        for chunk in chunks:
+            metadata = {k: v for k, v in chunk.items() if k != "content"}
+            metadatas.append(metadata)
+
+        # Add to Chroma
+        self.collection.add(
+            embeddings=embeddings.tolist(),
+            documents=texts,
+            metadatas=metadatas,
+            ids=ids
+        )
+        print(f"✅ Added {len(chunks)} chunks to vector store. Total: {self.collection.count()}")
 
     def search(self, query_embedding: np.ndarray, top_k: int = 4) -> List[Dict]:
         """Retrieve top-k most similar chunks for a query embedding."""
-        query_vec = query_embedding.reshape(1, -1).astype(np.float32)
-        scores, indices = self.index.search(query_vec, top_k)
+        query_vec = query_embedding.reshape(-1).tolist()
+        
+        results = self.collection.query(
+            query_embeddings=[query_vec],
+            n_results=top_k
+        )
 
-        results = []
-        for score, idx in zip(scores[0], indices[0]):
-            if idx != -1:
-                chunk = self.chunks[idx].copy()
-                chunk["similarity_score"] = float(score)
-                results.append(chunk)
-        return results
+        chunks_res = []
+        if not results['documents'] or not results['documents'][0]:
+            return chunks_res
 
-    def save(self, save_dir: str = "data/vector_store"):
-        """Persist the FAISS index and chunk metadata to disk."""
-        os.makedirs(save_dir, exist_ok=True)
-        faiss.write_index(self.index, os.path.join(save_dir, "index.faiss"))
-        with open(os.path.join(save_dir, "chunks.json"), "w") as f:
-            json.dump(self.chunks, f, indent=2)
-        print(f"💾 Vector store saved to: {save_dir}")
+        docs = results['documents'][0]
+        metas = results['metadatas'][0] if results['metadatas'] else [{}] * len(docs)
+        distances = results['distances'][0] if results['distances'] else [0.0] * len(docs)
 
-    def load(self, save_dir: str = "data/vector_store"):
-        """Load a persisted FAISS index and chunk metadata."""
-        self.index = faiss.read_index(os.path.join(save_dir, "index.faiss"))
-        with open(os.path.join(save_dir, "chunks.json"), "r") as f:
-            self.chunks = json.load(f)
-        print(f"✅ Loaded vector store: {self.index.ntotal} vectors.")
+        for doc, meta, dist in zip(docs, metas, distances):
+            chunk = meta.copy()
+            chunk["content"] = doc
+            chunk["similarity_score"] = float(1.0 - dist)
+            chunks_res.append(chunk)
+
+        return chunks_res
+
+    def save(self, save_dir: str = None):
+        """ChromaDB automatically persists data to disk."""
+        print("💾 Vector store implicitly saved (ChromaDB is persistent).")
+
+    def load(self, save_dir: str = None):
+        """Data is automatically loaded by PersistentClient."""
+        print(f"✅ Loaded vector store. Total: {self.collection.count()} vectors.")
 ```
 
 ---
@@ -125,7 +144,7 @@ class FAISSVectorStore:
 import json
 import glob
 from src.retrieval.embedder import DocumentEmbedder
-from src.retrieval.vector_store import FAISSVectorStore
+from src.retrieval.vector_store import ChromaVectorStore
 
 # Load all processed chunks
 all_chunks = []
@@ -137,13 +156,13 @@ print(f"📦 Total chunks to index: {len(all_chunks)}")
 
 # Initialize embedder and vector store
 embedder = DocumentEmbedder(model_name="all-MiniLM-L6-v2")
-store = FAISSVectorStore(embedding_dim=384)
+store = ChromaVectorStore(persist_directory="data/chroma_db", collection_name="qa_docs")
 
 # Build index
 store.add_chunks(all_chunks, embedder)
 
 # Save to disk
-store.save("data/vector_store")
+store.save("data/chroma_db")
 ```
 
 ```bash
@@ -156,9 +175,12 @@ python scripts/build_vector_store.py
 
 ```python
 # Quick retrieval test
+from src.retrieval.embedder import DocumentEmbedder
+from src.retrieval.vector_store import ChromaVectorStore
+
 embedder = DocumentEmbedder()
-store = FAISSVectorStore()
-store.load("data/vector_store")
+store = ChromaVectorStore()
+store.load("data/chroma_db")
 
 query = "What is the annual leave policy?"
 query_vec = embedder.embed_query(query)
@@ -174,6 +196,6 @@ for r in results:
 
 ## ✅ Checklist
 - [ ] `DocumentEmbedder` generates normalized embeddings.
-- [ ] `FAISSVectorStore` indexes and retrieves chunks correctly.
-- [ ] Vector store saved to `data/vector_store/`.
+- [ ] `ChromaVectorStore` indexes and retrieves chunks correctly.
+- [ ] Vector store implicitly saved to `data/chroma_db/`.
 - [ ] Retrieval test returns relevant chunks for sample queries.
