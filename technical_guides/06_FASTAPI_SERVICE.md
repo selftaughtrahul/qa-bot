@@ -17,7 +17,7 @@ import uuid
 
 from src.ingestion.pipeline import ingest_document
 from src.retrieval.embedder import DocumentEmbedder
-from src.retrieval.vector_store import FAISSVectorStore
+from src.retrieval.vector_store import ChromaVectorStore
 from src.generation.conversational_rag_chain import ConversationalRAGChain
 
 # ── App Setup ──────────────────────────────────────────────────────────────────
@@ -40,7 +40,7 @@ VECTOR_STORE_DIR = "data/vector_store"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 embedder = DocumentEmbedder()
-vector_store = FAISSVectorStore()
+vector_store = ChromaVectorStore()
 
 # Session-based RAG chains (keyed by session_id)
 sessions: dict = {}
@@ -74,7 +74,7 @@ class AnswerResponse(BaseModel):
 def health_check():
     return {
         "status": "ok",
-        "vector_store_size": vector_store.index.ntotal if vector_store.index else 0,
+        "vector_store_size": vector_store.collection.count() if vector_store.collection else 0,
         "active_sessions": len(sessions)
     }
 
@@ -102,14 +102,14 @@ async def upload_document(file: UploadFile = File(...)):
         "status": "success",
         "document": file.filename,
         "chunks_created": len(chunks),
-        "total_indexed": vector_store.index.ntotal
+        "total_indexed": vector_store.collection.count()
     }
 
 
 @app.post("/ask", response_model=AnswerResponse)
 def ask_question(request: QuestionRequest):
     """Ask a question against the ingested knowledge base."""
-    if vector_store.index.ntotal == 0:
+    if vector_store.collection.count() == 0:
         raise HTTPException(status_code=400, detail="No documents ingested yet. Please upload documents first.")
 
     chain = get_or_create_chain(request.session_id)
@@ -145,7 +145,7 @@ def clear_session(session_id: str):
 def reset_vector_store():
     """Clear all ingested documents and reset the vector store."""
     global vector_store
-    vector_store = FAISSVectorStore()
+    vector_store = ChromaVectorStore()
     sessions.clear()
     return {"status": "vector store reset", "message": "All documents and sessions cleared."}
 ```
