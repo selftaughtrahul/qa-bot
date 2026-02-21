@@ -113,7 +113,7 @@ CONVERSATIONAL_QA_PROMPT = PromptTemplate(
 ```python
 from typing import Tuple, List, Dict
 from src.retrieval.embedder import DocumentEmbedder
-from src.retrieval.vector_store import FAISSVectorStore
+from src.retrieval.vector_store import ChromaVectorStore
 from src.generation.llm_setup import get_llm
 from src.generation.prompt_template import CONVERSATIONAL_QA_PROMPT
 from src.generation.memory import ConversationMemory
@@ -124,7 +124,7 @@ class ConversationalRAGChain:
 
     def __init__(
         self,
-        vector_store: FAISSVectorStore,
+        vector_store: ChromaVectorStore,
         embedder: DocumentEmbedder,
         llm_provider: str = "openai",
         top_k: int = 4,
@@ -186,11 +186,11 @@ class ConversationalRAGChain:
 ```python
 # scripts/test_conversation.py
 from src.retrieval.embedder import DocumentEmbedder
-from src.retrieval.vector_store import FAISSVectorStore
+from src.retrieval.vector_store import ChromaVectorStore
 from src.generation.conversational_rag_chain import ConversationalRAGChain
 
 embedder = DocumentEmbedder()
-store = FAISSVectorStore()
+store = ChromaVectorStore()
 store.load("data/vector_store")
 
 chain = ConversationalRAGChain(store, embedder, llm_provider="openai")
