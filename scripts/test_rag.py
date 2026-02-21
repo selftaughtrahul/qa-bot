@@ -3,13 +3,13 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.retrieval.embedder import DocumentEmbedder
-from src.retrieval.vector_store import FAISSVectorStore
+from src.retrieval.vector_store import ChromaVectorStore
 from src.generation.rag_chain import RAGChain
 
 # Load components
 embedder = DocumentEmbedder()
-store = FAISSVectorStore()
-store.load("data/vector_store")
+store = ChromaVectorStore()
+store.load("data/chroma_db")
 
 # Build RAG chain
 rag = RAGChain(vector_store=store, embedder=embedder, llm_provider="groq")
