@@ -1,6 +1,6 @@
 from typing import Tuple, List, Dict
 from src.retrieval.embedder import DocumentEmbedder
-from src.retrieval.vector_store import FAISSVectorStore
+from src.retrieval.vector_store import ChromaVectorStore
 from src.generation.llm_setup import get_llm
 from src.generation.prompt_template import CONVERSATIONAL_QA_PROMPT
 from src.generation.memory import ConversationMemory
@@ -11,11 +11,11 @@ class ConversationalRAGChain:
 
     def __init__(
         self,
-        vector_store: FAISSVectorStore,
+        vector_store: ChromaVectorStore,
         embedder: DocumentEmbedder,
         llm_provider: str = "groq",
         top_k: int = 4,
-        max_history_turns: int = 10
+        max_history_turns: int = 5
     ):
         self.vector_store = vector_store
         self.embedder = embedder
