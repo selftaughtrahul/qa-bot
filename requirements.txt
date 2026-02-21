@@ -1,0 +1,19 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+langchain
+langchain-openai
+langchain-community
+langchain-groq
+langchain-google-genai
+transformers
+torch
+faiss-cpu
+streamlit
+ragas
+pandas
+datasets
+sentence-transformers
+PyMuPDF  # (or fitz, typical for pdfs)
+python-docx
