@@ -9,7 +9,7 @@ langchain-groq
 langchain-google-genai
 transformers
 torch
-faiss-cpu
+chromadb
 streamlit
 ragas
 pandas
