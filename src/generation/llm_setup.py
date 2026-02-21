@@ -10,20 +10,18 @@ def get_llm(provider: str = "groq"):
     Supports: 'groq', 'huggingface', 'gemini'
     """
     if provider == "huggingface":
-        from langchain_community.llms import HuggingFacePipeline
-        from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
-        import torch
+        from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
 
-        model_id = "mistralai/Mistral-7B-Instruct-v0.2"
-        tokenizer = AutoTokenizer.from_pretrained(model_id)
-        model = AutoModelForCausalLM.from_pretrained(
-            model_id,
-            torch_dtype=torch.float16,
-            device_map="auto"
+        hf_token = os.getenv("HUGGINGFACE_API_KEY", os.getenv("HF_TOKEN"))
+
+        llm = HuggingFaceEndpoint(
+            repo_id="meta-llama/Llama-3.2-1B-Instruct",
+            huggingfacehub_api_token=hf_token,
+            temperature=0.5,
+            max_new_tokens=512,
         )
-        pipe = pipeline("text-generation", model=model, tokenizer=tokenizer, max_new_tokens=512)
-        return HuggingFacePipeline(pipeline=pipe)
-    
+
+        return ChatHuggingFace(llm=llm)  # wraps it as a chat model (conversational)
 
     elif provider == "groq":
         from langchain_groq import ChatGroq
@@ -36,9 +34,9 @@ def get_llm(provider: str = "groq"):
     elif provider == "gemini":
         from langchain_google_genai import ChatGoogleGenerativeAI
         return ChatGoogleGenerativeAI(
-            model_name="gemini-2.5-flash",
+            model="gemini-2.5-flash",
             temperature=0,
-            google_api_key=os.getenv("GOOGLE_API_KEY")
+            google_api_key=os.getenv("GEMINI_API_KEY")
         )
 
     else:
