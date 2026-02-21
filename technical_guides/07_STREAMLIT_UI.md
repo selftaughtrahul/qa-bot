@@ -14,7 +14,7 @@ import tempfile
 
 from src.ingestion.pipeline import ingest_document
 from src.retrieval.embedder import DocumentEmbedder
-from src.retrieval.vector_store import FAISSVectorStore
+from src.retrieval.vector_store import ChromaVectorStore
 from src.generation.conversational_rag_chain import ConversationalRAGChain
 
 # ── Page Config ────────────────────────────────────────────────────────────────
@@ -55,7 +55,7 @@ def init_session():
     if "embedder" not in st.session_state:
         st.session_state.embedder = DocumentEmbedder()
     if "vector_store" not in st.session_state:
-        st.session_state.vector_store = FAISSVectorStore()
+        st.session_state.vector_store = ChromaVectorStore()
     if "rag_chain" not in st.session_state:
         st.session_state.rag_chain = None
     if "chat_history" not in st.session_state:
@@ -123,7 +123,7 @@ with st.sidebar:
 
     # Clear button
     if st.button("🗑️ Clear Everything", use_container_width=True):
-        st.session_state.vector_store = FAISSVectorStore()
+        st.session_state.vector_store = ChromaVectorStore()
         st.session_state.rag_chain = None
         st.session_state.chat_history = []
         st.session_state.documents_loaded = []
