@@ -10,7 +10,7 @@ from ragas.metrics import (
 )
 
 from src.retrieval.embedder import DocumentEmbedder
-from src.retrieval.vector_store import FAISSVectorStore
+from src.retrieval.vector_store import ChromaVectorStore
 from src.generation.rag_chain import RAGChain
 
 
@@ -23,8 +23,8 @@ def run_evaluation(eval_dataset_path: str = "data/eval_dataset.json"):
 
     # Load RAG components
     embedder = DocumentEmbedder()
-    store = FAISSVectorStore()
-    store.load("data/vector_store")
+    store = ChromaVectorStore()
+    store.load("data/chroma_db")
     rag = RAGChain(vector_store=store, embedder=embedder, llm_provider="groq")
 
     # Collect predictions
