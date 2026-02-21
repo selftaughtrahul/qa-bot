@@ -59,7 +59,7 @@ Organizations and individuals struggle to extract specific information from larg
 - **Performance:** Answer latency < 3 seconds (with local LLM) or < 1.5 seconds (with API LLM).
 - **Reliability:** System must handle malformed or scanned PDFs gracefully.
 - **Security:** No document data stored permanently without user consent.
-- **Portability:** Runs locally (FAISS) or with cloud vector DB (ChromaDB Cloud / Pinecone).
+- **Portability:** Runs locally or with cloud vector DB.
 - **Maintainability:** Modular codebase with clear separation of ingestion, retrieval, and generation.
 
 ---
