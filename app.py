@@ -4,7 +4,7 @@ import tempfile
 
 from src.ingestion.pipeline import ingest_document
 from src.retrieval.embedder import DocumentEmbedder
-from src.retrieval.vector_store import FAISSVectorStore
+from src.retrieval.vector_store import ChromaVectorStore
 from src.generation.conversational_rag_chain import ConversationalRAGChain
 
 # ── Page Config ────────────────────────────────────────────────────────────────
@@ -45,13 +45,25 @@ def init_session():
     if "embedder" not in st.session_state:
         st.session_state.embedder = DocumentEmbedder()
     if "vector_store" not in st.session_state:
-        st.session_state.vector_store = FAISSVectorStore()
-    if "rag_chain" not in st.session_state:
-        st.session_state.rag_chain = None
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
+        st.session_state.vector_store = ChromaVectorStore()
     if "documents_loaded" not in st.session_state:
         st.session_state.documents_loaded = []
+    
+    # Automatically initialize RAG chain if vector store already has data (persistence)
+    if "rag_chain" not in st.session_state or st.session_state.rag_chain is None:
+        if st.session_state.vector_store.collection.count() > 0:
+            st.session_state.rag_chain = ConversationalRAGChain(
+                vector_store=st.session_state.vector_store,
+                embedder=st.session_state.embedder,
+                llm_provider="groq",
+                top_k=4
+            )
+            st.session_state.documents_loaded = ["(Previously Loaded Documents)"]
+        else:
+            st.session_state.rag_chain = None
+
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
 
 init_session()
 
@@ -94,11 +106,13 @@ with st.sidebar:
                     all_chunks, st.session_state.embedder
                 )
 
-                # Create RAG chain
+                # Create RAG chain using the configured defaults (they can be updated later)
+                # Defaults: top_k=4, llm_provider="groq"
                 st.session_state.rag_chain = ConversationalRAGChain(
                     vector_store=st.session_state.vector_store,
                     embedder=st.session_state.embedder,
-                    llm_provider="groq"
+                    llm_provider="groq",
+                    top_k=4
                 )
 
             st.success(f"✅ {len(uploaded_files)} document(s) processed! ({len(all_chunks)} chunks indexed)")
@@ -113,7 +127,7 @@ with st.sidebar:
 
     # Clear button
     if st.button("🗑️ Clear Everything", use_container_width=True):
-        st.session_state.vector_store = FAISSVectorStore()
+        st.session_state.vector_store = ChromaVectorStore()
         st.session_state.rag_chain = None
         st.session_state.chat_history = []
         st.session_state.documents_loaded = []
@@ -123,8 +137,36 @@ with st.sidebar:
     # Settings
     st.markdown("---")
     st.markdown("**⚙️ Settings**")
+    
+    # Track setting changes to update the RAG chain dynamically
     top_k = st.slider("Top-K Chunks", min_value=1, max_value=8, value=4)
     llm_provider = st.selectbox("LLM Provider", ["groq", "huggingface", "gemini"])
+    
+    if st.session_state.rag_chain is not None:
+        # Update chain parameters if they change
+        st.session_state.rag_chain.top_k = top_k
+        
+        # Check if the currently instantiated LLM matches the requested provider
+        current_llm_type = type(st.session_state.rag_chain.llm).__name__
+        expected_type = ""
+        if llm_provider == "groq":
+            expected_type = "ChatGroq"
+        elif llm_provider == "gemini":
+            expected_type = "ChatGoogleGenerativeAI"
+        elif llm_provider == "huggingface":
+            expected_type = "HuggingFacePipeline"
+
+        if current_llm_type != expected_type:
+            # Re-initialize the RAG Chain to correctly instantiate the new LLM
+            temp_memory = st.session_state.rag_chain.memory
+            st.session_state.rag_chain = ConversationalRAGChain(
+                vector_store=st.session_state.vector_store,
+                embedder=st.session_state.embedder,
+                llm_provider=llm_provider,
+                top_k=top_k
+            )
+            # Preserve conversation memory history across LLM swaps
+            st.session_state.rag_chain.memory = temp_memory
 
 
 # ── Main Chat Area ─────────────────────────────────────────────────────────────
