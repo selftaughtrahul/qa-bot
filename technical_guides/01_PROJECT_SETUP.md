@@ -29,7 +29,7 @@ qa_bot/
 ├── data/
 │   ├── raw/              # Uploaded source documents (PDF, DOCX, TXT)
 │   ├── processed/        # Extracted & chunked text (JSON)
-│   └── vector_store/     # FAISS index files
+│   └── vector_store/     # ChromaDB index files
 ├── src/
 │   ├── ingestion/        # Document parsing & chunking
 │   ├── retrieval/        # Embedding & vector search
@@ -80,7 +80,7 @@ pypdf==4.2.0
 
 # Embeddings & Vector Store
 sentence-transformers==2.7.0
-faiss-cpu==1.8.0
+chromadb
 chromadb==0.5.0
 
 # LLM (local option)
