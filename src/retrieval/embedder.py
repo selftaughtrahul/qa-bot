@@ -2,7 +2,12 @@ from sentence_transformers import SentenceTransformer
 from typing import List
 import numpy as np
 import os
+import logging
 
+# Suppress unnecessary transformer warnings
+os.environ["TRANSFORMERS_VERBOSITY"] = "error"
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+logging.getLogger("transformers").setLevel(logging.ERROR)
 
 class DocumentEmbedder:
     """Generates dense embeddings using sentence-transformers."""
