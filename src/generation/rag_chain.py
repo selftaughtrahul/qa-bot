@@ -5,7 +5,7 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
 from src.retrieval.embedder import DocumentEmbedder
-from src.retrieval.vector_store import FAISSVectorStore
+from src.retrieval.vector_store import ChromaVectorStore
 from src.generation.prompt_template import QA_PROMPT
 from src.generation.llm_setup import get_llm
 
@@ -17,7 +17,7 @@ class RAGChain:
 
     def __init__(
         self,
-        vector_store: FAISSVectorStore,
+        vector_store: ChromaVectorStore,
         embedder: DocumentEmbedder,
         llm_provider: str = "groq",
         top_k: int = 4
