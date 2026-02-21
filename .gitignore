@@ -42,3 +42,6 @@ reports/*
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Ignored Folders
+technical_guides/
