@@ -61,7 +61,7 @@ The QA Bot is a RAG-based system composed of three layers:
         ↓
 [Embedding Model] → Generate dense vectors (sentence-transformers / OpenAI)
         ↓
-[Vector Store] → Index & persist vectors (FAISS / ChromaDB)
+[Vector Store] → Index & persist vectors (ChromaDB)
         ↓
 [User Asks Question]
         ↓
