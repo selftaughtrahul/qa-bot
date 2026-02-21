@@ -26,6 +26,25 @@ QA Bot leverages the power of Large Language Models (LLMs) combined with dense v
 
 ---
 
+## 📄 Project Documentation
+
+For a deep dive into the business goals, functional requirements, and project scope, please refer to the following standard project documents:
+- [**Business Requirements Document (BRD)**](BRD.md)
+- [**Functional Requirements Document (FRD)**](FRD.md)
+- [**Statement of Work (SOW)**](SOW.md)
+
+---
+
+## 🎨 Application Interface
+
+*(Save your Streamlit screenshot as `docs/ui_screenshot.png` to display it here!)*
+
+<p align="center">
+  <img src="docs/ui_screenshot.png" alt="QA Bot Streamlit UI Screenshot" width="800" style="border-radius:10px;"/>
+</p>
+
+---
+
 ## 🏗️ Project Structure
 ```text
 qa_bot/
@@ -33,13 +52,16 @@ qa_bot/
 ├── api.py                     # Headless FastAPI Backend
 ├── requirements.txt           # Python Dependencies
 ├── .env                       # Environment credentials
+├── SOW.md                     # Statement of Work
+├── BRD.md                     # Business Requirements Document
+├── FRD.md                     # Functional Requirements Document
 ├── src/                       
 │   ├── ingestion/             # Document parsing & chunking modules
 │   ├── retrieval/             # Embedding & Vector store operations
 │   └── generation/            # RAG chains & conversational logic
 ├── scripts/                   # Auxiliary and testing scripts
 ├── data/                      # Permanent Vector Storage & raw files
-└── docs/                      # Standard requirement documents (SOW/BRD/FRD)
+└── docs/                      # UI Screenshots and diagrams
 ```
 
 ---
