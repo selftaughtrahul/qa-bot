@@ -1,109 +1,74 @@
-# 📚 QA Bot — Ask Your Documents
+# 🤖 QA Bot — Ask Your Documents
 
-## 📖 Project Overview
+Welcome to **QA Bot**, an intelligent Question Answering System powered by Retrieval-Augmented Generation (RAG). Turn your unstructured documents (PDFs, Word documents, text files) into an interactive, knowledgeable AI assistant.
 
-**QA Bot** is an intelligent Question Answering System built using a Retrieval-Augmented Generation (RAG) paradigm. It allows users to ask natural-language questions over unstructured text documents (PDFs, Word documents, plain text) and receive accurate, context-grounded answers. The system leverages dense embeddings, a vector database, and modern Large Language Models (LLMs) to provide fast and accurate Q&A capabilities over uploaded document corpora.
+---
 
-## ✨ Key Features
+## 🚀 Overview
 
-- **Document Ingestion Pipeline:** Supports uploading and processing multiple file formats including PDF, DOCX, and TXT files. Extracts text, chunks it, and tags it with metadata.
-- **Embedding & Vector Store:** Generates dense embeddings for text chunks using `sentence-transformers` and efficiently stores/indexes them using **FAISS** for fast similarity search.
-- **Retrieval-Augmented Generation (RAG):** Uses LangChain to perform semantic search, retrieving top relevant document chunks and feeding them as context to an LLM to generate precise answers.
-- **Multiple LLM Providers:** Supports flexible LLM backends including **Groq**, **HuggingFace**, and **Google Gemini***.
-- **Conversational Memory:** Preserves multi-turn conversation history for context-aware follow-up questions.
-- **Interactive UI:** A highly intuitive **Streamlit** chat interface with file upload capabilities, chat history, and visual source citation display.
-- **REST API:** Provides a **FastAPI** backend for document upload and Q&A endpoints.
+QA Bot leverages the power of Large Language Models (LLMs) combined with dense vector embeddings to give you fast, accurate, context-grounded answers. Instead of hallucinating, the bot automatically retrieves the most relevant chunks from your uploaded documents and references them in its responses. 
 
-## 🛠️ Tech Stack
+### ✨ Key Features
+- **Multi-Format Document Ingestion:** Simply drag and drop PDFs, DOCX, or TXT files.
+- **Fast Similarity Search:** Powered by local, persistent vector storage via **ChromaDB**.
+- **Flexible AI Integration:** Instantly swap between LLM providers such as **Groq**, **Google Gemini**, and **Hugging Face**.
+- **Conversational Memory:** The bot remembers the context of your previous questions natively! 
+- **Beautiful UI:** A highly interactive chat interface built with **Streamlit**, featuring expandable source citations.
 
-- **Language:** Python 3.10+
-- **Frameworks:** Streamlit, FastAPI, LangChain
-- **Embeddings:** `sentence-transformers`
-- **Vector Database:** FAISS (Local)
-- **Document Parsing:** PyMuPDF (`fitz`), `python-docx`
-- **LLM Providers:** Groq, Google GenAI, HuggingFace
+---
 
-## 🗂️ Project Structure
+## 🛠️ Technology Stack
+- **Interface:** Streamlit & FastAPI
+- **Orchestration:** LangChain
+- **Embeddings:** `sentence-transformers` (all-MiniLM-L6-v2)
+- **Vector Database:** ChromaDB 
+- **LLM Pipeline:** Groq / Google GenAI / HuggingFace Pipelines
 
+---
+
+## 🏗️ Project Structure
 ```text
 qa_bot/
-├── app.py                     # Streamlit web application frontend
-├── api.py                     # FastAPI backend application
-├── requirements.txt           # Project Python dependencies
-├── .env                       # Environment variables (API keys)
-├── src/                       # Source code directory
-│   ├── ingestion/             # Document parsing and chunking logic
-│   ├── retrieval/             # Embedding generation and FAISS vector store management
-│   └── generation/            # RAG chain and prompt templates
-├── data/                      # Data directory for uploaded files and persistent stores
-├── docs/                      # General project documentation
-├── notebooks/                 # Jupyter notebooks for testing and experimentation
-├── reports/                   # Generated reports and metrics
-├── scripts/                   # Utility scripts
-├── technical_guides/          # Module-wise technical guides
-├── tests/                     # Unit and integration tests
-├── SOW.md                     # Statement of Work
-├── BRD.md                     # Business Requirements Document
-└── FRD.md                     # Functional Requirements Document
+├── app.py                     # Interactive Streamlit Web Interface
+├── api.py                     # Headless FastAPI Backend
+├── requirements.txt           # Python Dependencies
+├── .env                       # Environment credentials
+├── src/                       
+│   ├── ingestion/             # Document parsing & chunking modules
+│   ├── retrieval/             # Embedding & Vector store operations
+│   └── generation/            # RAG chains & conversational logic
+├── scripts/                   # Auxiliary and testing scripts
+├── data/                      # Permanent Vector Storage & raw files
+└── docs/                      # Standard requirement documents (SOW/BRD/FRD)
 ```
 
-## 🚀 Setup Instructions
+---
 
-1. **Clone the Repository**
+## 🏃‍♂️ Getting Started
 
-   ```bash
-   git clone <repository-url>
-   cd qa_bot
-   ```
+### 1. Requirements & Setup
+Clone the repository and install the dependencies in a virtual environment:
+```bash
+python -m venv venv
+venv\Scripts\activate   # On MacOS/Linux use: source venv/bin/activate
+pip install -r requirements.txt
+```
 
-2. **Create a Virtual Environment**
+### 2. Configure Environment Keys
+Create a `.env` file in the root directory. Add your active API tokens:
+```env
+GROQ_API_KEY=your_key_here
+GEMINI_API_KEY=your_key_here
+HUGGINGFACE_API_KEY=your_key_here
+```
 
-   ```bash
-   python -m venv venv
-   # On Windows:
-   venv\Scripts\activate
-   # On macOS/Linux:
-   source venv/bin/activate
-   ```
-
-3. **Install Dependencies**
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Set Up Environment Variables**
-   Create a `.env` file in the root directory and add your necessary API keys (e.g., Groq, Gemini, HuggingFace, or OpenAI):
-   ```env
-   GROQ_API_KEY=your_groq_api_key_here
-   GEMINI_API_KEY=your_gemini_api_key_here
-   # Add any other required keys
-   ```
-
-## 🎮 Usage
-
-### Running the Streamlit App
-
-To launch the interactive user interface:
-
+### 3. Launch the Application!
+Start the Streamlit interface safely:
 ```bash
 streamlit run app.py
 ```
-
-1. Open the provided localserver URL in your browser.
-2. Use the **Sidebar** to upload your PDF, DOCX, or TXT documents.
-3. Click **⚡ Process Documents** to chunk and embed the files.
-4. Start asking questions in the main chat area!
-
-### Running the FastAPI Backend
-
-If you wish to use the REST API rather than the web GUI:
-
-```bash
-uvicorn api:app --reload
-```
-
-Then, navigate to `http://127.0.0.1:8000/docs` to interact with the Swagger UI for testing the API endpoints.
+Upload your documents using the sidebar, click **⚡ Process Documents**, and start chatting immediately!
 
 ---
-*Prepared by Antigravity AI*
+
+*Prepared by Rahul*
