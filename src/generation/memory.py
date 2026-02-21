@@ -11,7 +11,7 @@ class ConversationTurn:
 class ConversationMemory:
     """Manages multi-turn conversation history."""
 
-    def __init__(self, max_turns: int = 10):
+    def __init__(self, max_turns: int = 5):
         self.history: List[ConversationTurn] = []
         self.max_turns = max_turns  # Limit history to avoid token overflow
 
