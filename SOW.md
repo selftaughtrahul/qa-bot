@@ -31,7 +31,7 @@ Enterprises and individuals deal with large volumes of unstructured text — pol
 
 - **Embedding & Vector Store**
   - Generate dense embeddings using `sentence-transformers` or OpenAI Embeddings.
-  - Store and index embeddings in a vector database (FAISS / ChromaDB).
+  - Store and index embeddings in a vector database (ChromaDB).
 
 - **Retrieval-Augmented Generation (RAG)**
   - Semantic similarity search to retrieve top-k relevant chunks.
@@ -59,7 +59,7 @@ Enterprises and individuals deal with large volumes of unstructured text — pol
 | # | Deliverable | Description |
 |---|-------------|-------------|
 | 1 | Ingestion Pipeline | Script to parse, chunk, embed, and store documents. |
-| 2 | Vector Store Index | FAISS/ChromaDB index files for fast retrieval. |
+| 2 | Vector Store Index | ChromaDB index files for fast retrieval. |
 | 3 | RAG Chain | LangChain-based retrieval + generation pipeline. |
 | 4 | FastAPI Service | API for document upload and question answering. |
 | 5 | Streamlit App | Interactive chat UI with source citations. |
@@ -71,7 +71,7 @@ Enterprises and individuals deal with large volumes of unstructured text — pol
 
 - **Language:** Python 3.10+
 - **Embeddings:** `sentence-transformers` (all-MiniLM-L6-v2), OpenAI `text-embedding-ada-002`
-- **Vector DB:** FAISS (local) / ChromaDB (persistent)
+- **Vector DB:** ChromaDB (persistent)
 - **LLM:** OpenAI GPT-3.5/4 or HuggingFace `mistralai/Mistral-7B-Instruct`
 - **Orchestration:** LangChain
 - **Document Parsing:** PyMuPDF (`fitz`), `python-docx`, `pypdf`
