@@ -37,10 +37,10 @@ For a deep dive into the business goals, functional requirements, and project sc
 
 ## 🎨 Application Interface
 
-*(Save your Streamlit screenshot as `docs/ui_screenshot.png` to display it here!)*
+*(Save your Streamlit screenshot as `docs/image.png` to display it here!)*
 
 <p align="center">
-  <img src="docs/ui_screenshot.png" alt="QA Bot Streamlit UI Screenshot" width="800" style="border-radius:10px;"/>
+  <img src="docs/image.png" alt="QA Bot Streamlit UI Screenshot" width="800" style="border-radius:10px;"/>
 </p>
 
 ---
