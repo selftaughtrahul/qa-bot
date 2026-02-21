@@ -7,7 +7,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import json
 import glob
 from src.retrieval.embedder import DocumentEmbedder
-from src.retrieval.vector_store import FAISSVectorStore
+from src.retrieval.vector_store import ChromaVectorStore
 
 # Load all processed chunks
 all_chunks = []
@@ -19,10 +19,10 @@ print(f"📦 Total chunks to index: {len(all_chunks)}")
 
 # Initialize embedder and vector store
 embedder = DocumentEmbedder(model_name="all-MiniLM-L6-v2")
-store = FAISSVectorStore(embedding_dim=384)
+store = ChromaVectorStore(persist_directory="data/chroma_db", collection_name="qa_docs")
 
 # Build index
 store.add_chunks(all_chunks, embedder)
 
 # Save to disk
-store.save("data/vector_store")
+store.save("data/chroma_db")
