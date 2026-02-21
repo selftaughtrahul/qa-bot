@@ -104,7 +104,7 @@ from langchain.schema.runnable import RunnablePassthrough
 from langchain.schema.output_parser import StrOutputParser
 
 from src.retrieval.embedder import DocumentEmbedder
-from src.retrieval.vector_store import FAISSVectorStore
+from src.retrieval.vector_store import ChromaVectorStore
 from src.generation.prompt_template import QA_PROMPT
 from src.generation.llm_setup import get_llm
 
@@ -116,7 +116,7 @@ class RAGChain:
 
     def __init__(
         self,
-        vector_store: FAISSVectorStore,
+        vector_store: ChromaVectorStore,
         embedder: DocumentEmbedder,
         llm_provider: str = "openai",
         top_k: int = 4
@@ -169,12 +169,12 @@ class RAGChain:
 ```python
 # scripts/test_rag.py
 from src.retrieval.embedder import DocumentEmbedder
-from src.retrieval.vector_store import FAISSVectorStore
+from src.retrieval.vector_store import ChromaVectorStore
 from src.generation.rag_chain import RAGChain
 
 # Load components
 embedder = DocumentEmbedder()
-store = FAISSVectorStore()
+store = ChromaVectorStore()
 store.load("data/vector_store")
 
 # Build RAG chain
